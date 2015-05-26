@@ -4,7 +4,7 @@ Plugin Name: Zendesk Help Center Backup by BestWebSoft
 Plugin URI: http://bestwebsoft.com/products/
 Description: This plugin allows to backup Zendesk Help Center.
 Author: BestWebSoft
-Version: 0.1
+Version: 0.1.1
 Author URI: http://bestwebsoft.com/
 License: GPLv3 or later
 */
