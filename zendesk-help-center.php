@@ -4,7 +4,7 @@ Plugin Name: Zendesk Help Center Backup by BestWebSoft
 Plugin URI: http://bestwebsoft.com/products/
 Description: This plugin allows to backup Zendesk Help Center.
 Author: BestWebSoft
-Version: 0.1.1
+Version: 0.1.2
 Author URI: http://bestwebsoft.com/
 License: GPLv3 or later
 */
@@ -282,6 +282,13 @@ if ( ! function_exists( 'zndskhc_settings_page' ) ) {
 				update_option( 'zndskhc_options', $zndskhc_options );
 				$message = __( "Settings saved" , 'zendesk_hc' );
 			}
+		}
+
+		/* Add restore function */
+		if ( isset( $_REQUEST['bws_restore_confirm'] ) && check_admin_referer( plugin_basename( __FILE__ ), 'bws_settings_nonce_name' ) ) {
+			$zndskhc_options = $zndskhc_options_default;
+			update_option( 'zndskhc_options', $zndskhc_options );
+			$message = __( 'All plugin settings were restored.', 'zendesk_hc' );
 		} ?>
 		<div class="wrap">
 			<div class="icon32 icon32-bws" id="icon-options-general"></div>
@@ -294,7 +301,9 @@ if ( ! function_exists( 'zndskhc_settings_page' ) ) {
 			<div class="updated fade" <?php if ( '' == $message || '' != $error ) echo "style=\"display:none\""; ?>><p><strong><?php echo $message; ?></strong></p></div>
 			<div class="error" <?php if ( '' == $error ) echo 'style="display:none"'; ?>><p><strong><?php echo $error; ?></strong></p></div>
 			<div id="zndskhc_settings_notice" class="updated fade" style="display:none"><p><strong><?php _e( "Notice:", 'zendesk_hc' ); ?></strong> <?php _e( "The plugin's settings have been changed. In order to save them, please don't forget to click 'Save Changes' button.", 'zendesk_hc' ); ?></p></div>
-			<?php if ( ! isset( $_GET['tab'] ) ) {
+			<?php if ( isset( $_REQUEST['bws_restore_default'] ) && check_admin_referer( plugin_basename( __FILE__ ), 'bws_settings_nonce_name' ) ) {
+				bws_form_restore_default_confirm( plugin_basename( __FILE__ ) );
+			} elseif ( ! isset( $_GET['tab'] ) ) {
 				if ( ! empty( $zndskhc_options['last_synch'] ) ) { ?>
 					<p><?php _e( 'Last synchronization with Zendesk HC was on' , 'zendesk_hc' ); echo ' ' . $zndskhc_options['last_synch']; ?></p>
 				<?php }
@@ -317,7 +326,7 @@ if ( ! function_exists( 'zndskhc_settings_page' ) ) {
 					<form method="post" action="admin.php?page=zendesk_hc.php&tab=settings">
 						<table class="form-table">
 							<tr valign="top">
-								<th scope="row"><?php _e( 'Log file size', 'zendesk_hc' ); ?>:</th>
+								<th scope="row"><?php _e( 'Log file size', 'zendesk_hc' ); ?></th>
 								<td>
 									<p>
 										&#126; <?php echo $log_size . ' ' . __( 'Kbyte', 'zendesk_hc' ); ?>
@@ -337,9 +346,9 @@ if ( ! function_exists( 'zndskhc_settings_page' ) ) {
 						<tr valign="top">
 							<th scope="row"><?php _e( 'Zendesk Information', 'zendesk_hc' ); ?></th>
 							<td>
-								<input type="text" name="zndskhc_subdomain" value="<?php echo $zndskhc_options['subdomain']; ?>" /> <?php _e( 'subdomain', 'zendesk_hc' ); ?><br />
-								<input type="text" name="zndskhc_user" value="<?php echo $zndskhc_options['user']; ?>" /> <?php _e( 'user', 'zendesk_hc' ); ?><br />
-								<input type="password" name="zndskhc_password" value="<?php echo $zndskhc_options['password']; ?>" /> <?php _e( 'password', 'zendesk_hc' ); ?>
+								<input type="text" maxlength='250' name="zndskhc_subdomain" value="<?php echo $zndskhc_options['subdomain']; ?>" /> <?php _e( 'subdomain', 'zendesk_hc' ); ?><br />
+								<input type="text" maxlength='250' name="zndskhc_user" value="<?php echo $zndskhc_options['user']; ?>" /> <?php _e( 'user', 'zendesk_hc' ); ?><br />
+								<input type="password" maxlength='250' name="zndskhc_password" value="<?php echo $zndskhc_options['password']; ?>" /> <?php _e( 'password', 'zendesk_hc' ); ?>
 							</td>
 						</tr>
 						<tr valign="top">
@@ -364,7 +373,7 @@ if ( ! function_exists( 'zndskhc_settings_page' ) ) {
 							<th scope="row"><?php _e( 'Send email in case of backup failure', 'zendesk_hc' ); ?></th>
 							<td>
 								<input type="checkbox" name="zndskhc_emailing_fail_backup" value="1" <?php if ( $zndskhc_options['emailing_fail_backup'] ) echo 'checked'; ?> /><br />
-								<input type="email" name="zndskhc_email" value="<?php echo $zndskhc_options['email']; ?>" />
+								<input type="email" maxlength='250' name="zndskhc_email" value="<?php echo $zndskhc_options['email']; ?>" />
 							</td>
 						</tr>
 					</table>					
@@ -373,8 +382,9 @@ if ( ! function_exists( 'zndskhc_settings_page' ) ) {
 						<input type="submit" class="button-primary" value="<?php _e( 'Save Changes', 'zendesk_hc' ); ?>" />						
 						<?php wp_nonce_field( plugin_basename( __FILE__ ), 'zndskhc_nonce_name' ); ?>
 					</p>					
-				</form>				
-			<?php }
+				</form>
+				<?php bws_form_restore_default_settings( plugin_basename( __FILE__ ) );			
+			}
 			bws_plugin_reviews_block( $zndskhc_plugin_info['Name'], 'zendesk-help-center' ) ?>
 		</div>
 	<?php }
